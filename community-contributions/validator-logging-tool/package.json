@@ -1,14 +1,18 @@
 {
-    "name": "validator-logging-tool",
+    "name": "validator",
     "version": "1.0.0",
-    "description": "Validator Era Stats",
-    "main": "dist/app.js",
+    "description": "Validator",
+    "main": "lib/app.js",
     "scripts": {
-        "start": "tsc && node dist/app.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "start": "node lib/app.js",
+        "postinstall": "tsc",
+        "watch-node": "nodemon dist/index.js",
+        "watch-ts": "tsc -w",
+        "deploy": "git add . && git commit -m Heroku && git push heroku master"
     },
     "author": "Oleksandr Korniienko",
     "license": "MIT",
+    "engines": { "node": "15.14.0" },
     "dependencies": {
         "@joystream/types": "^0.16.1",
         "@polkadot/api": "4.2.1",
