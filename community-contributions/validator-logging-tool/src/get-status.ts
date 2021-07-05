@@ -1,8 +1,8 @@
 import { JoyApi } from "./joyApi";
 import { PromiseAllObj } from "./utils";
 
-// const api = new JoyApi('wss://rome-rpc-endpoint.joystream.org:9944/');
-const api = new JoyApi();
+const api = new JoyApi('wss://rome-rpc-endpoint.joystream.org:9944/');
+// const api = new JoyApi();
 
 export async function getStatus() {
   await api.init;
