@@ -10,6 +10,7 @@ config();
 
 export interface ActiveEra {
   era: number,
+  hash: string,
   block: number,
   date: string,
   points: number
@@ -74,8 +75,8 @@ export class JoyApi {
   }
 
 
-  async getActiveEras() {
-    const stash = '5EhDdcWm4TdqKp1ew1PqtSpoAELmjbZZLm5E34aFoVYkXdRW'
+  async getActiveEras(address: string) {
+    const stash = address || '5EhDdcWm4TdqKp1ew1PqtSpoAELmjbZZLm5E34aFoVYkXdRW';
     const blockStart = 1069639;
     const startHash = (await this.api.rpc.chain.getBlockHash(blockStart));
     console.log(`Start Hash [${startHash}]`);
@@ -84,7 +85,7 @@ export class JoyApi {
     const startTimestamp = new Date((await this.api.query.timestamp.now.at(startHash)).toNumber()).toISOString();
     console.log(`Start Date [${startTimestamp}]`);
     const blockEnd = 1270177;
-    const endHash = (await this.api.rpc.chain.getBlockHash(blockStart));
+    const endHash = (await this.api.rpc.chain.getBlockHash(blockEnd));
     console.log(`End Hash [${endHash}]`);
     const endEra = (await this.api.query.staking.activeEra.at(endHash)).unwrap().index.toNumber();
     console.log(`End Era [${endEra}]`);
@@ -126,13 +127,31 @@ export class JoyApi {
     }
   }
 
-  // async scoringPeriodBlocksEras() {
-  //   const scoringPeriodStartTime = "2021-06-21T00:00:00.000Z";
-  //   const scoringPeriodEndTime = "2021-07-04T23:59:59.999Z";
-  //   do {
-
-  //   }
-  // }
+  async getActiveErasForBlock(address: string, blockStart: number) {
+    const stash = address || '5EhDdcWm4TdqKp1ew1PqtSpoAELmjbZZLm5E34aFoVYkXdRW';
+    const startHash = (await this.api.rpc.chain.getBlockHash(blockStart));
+    const startEra = (await this.api.query.staking.activeEra.at(startHash)).unwrap().index.toNumber();
+    const startTimestamp = new Date((await this.api.query.timestamp.now.at(startHash)).toNumber()).toISOString();
+    const eraPoints = await this.api.query.staking.erasRewardPoints.at(startHash, startEra)
+    let data = undefined
+    eraPoints.individual.forEach((points, author) => {
+      // console.log(`Author Points [${author}]`);
+      // console.log(`Individual Points [${points}]`);
+      if (author.toString() === stash) {
+        const pn = Number(points.toBigInt())
+        const activeEra: ActiveEra = {
+          era: startEra,
+          hash: startHash.toString(),
+          block: blockStart,
+          date: startTimestamp,
+          points: pn
+        }
+        console.log(`Era [${activeEra.era}], Block [${activeEra.block}], Date [${activeEra.date}], Points [${activeEra.points}], Hash [${activeEra.hash}]`);
+        data = activeEra
+      }
+    });
+    return data
+  }
 
   async scoringPeriodData() {
     const blockStart = 1069700;
@@ -158,18 +177,6 @@ export class JoyApi {
       }
       newBlock -= 1
     }
-    // {
-    //     "newBlock": 1069639,
-    //     "blockHash": "0x2ac052528a1d1a28a4fef7f95c61092396a709bde571f2464e27cde657d4f1b1",
-    //     "blockEra": 1786,
-    //     "blockTimestamp": "2021-06-21T00:00:00.000Z"
-    // },
-    // {
-    //   "newBlock": 1270177,
-    //   "blockHash": "0x1af139be716904820c7d2a9d6ed05f6245f8c58aecbdaf05064ff174c645e5e8",
-    //   "blockEra": 2122,
-    //   "blockTimestamp": "2021-07-04T23:59:54.001Z"
-    // },
 
     const startHash = (await this.api.rpc.chain.getBlockHash(blockStart)) as Hash;
     const startEra = (await this.api.query.staking.activeEra.at(startHash)).unwrap().index.toNumber();
