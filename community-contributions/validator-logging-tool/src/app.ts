@@ -35,6 +35,10 @@ wss.on('connection', (ws: WebSocket) => {
             }
         } else {
             for (let blockHeight = endBlock; blockHeight >= startBlock; blockHeight -= 1) {
+                if (shouldStop) {
+                    shouldStop = false;
+                    break;
+                }
                 let status = await getStatusWs(address, blockHeight);
                 if (status) {
                     ws.send(JSON.stringify(status));

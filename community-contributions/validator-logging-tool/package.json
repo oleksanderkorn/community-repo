@@ -5,6 +5,7 @@
     "main": "lib/app.js",
     "scripts": {
         "start": "node lib/app.js",
+        "dev": "tsc && node lib/app.js",
         "postinstall": "tsc",
         "watch-node": "nodemon lib/app.js",
         "watch-ts": "tsc -w",
